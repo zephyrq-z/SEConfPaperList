@@ -7,6 +7,11 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+# Load .env file
+import os
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+
 BOT_NAME = 'paper_spiders'
 
 SPIDER_MODULES = ['paper_spiders.spiders']

@@ -1,12 +1,21 @@
-# Define here the models for your scraped items
-#
-# See documentation in:
-# https://docs.scrapy.org/en/latest/topics/items.html
-
 import scrapy
 
 
 class PaperSpidersItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    conf = scrapy.Field()
+    title = scrapy.Field()
+    author = scrapy.Field()
+    abstract = scrapy.Field()
+    full_version_url = scrapy.Field()
+    arxiv_url = scrapy.Field()
+    arxiv_pdf_url = scrapy.Field()
+    keywords = scrapy.Field()
+    title_cn = scrapy.Field()
+    abstract_cn = scrapy.Field()
+    arxiv_id = scrapy.Field()
+    doi = scrapy.Field()
+    dblp_url = scrapy.Field()
+    # Internal fields (not written to output)
+    uuid = scrapy.Field()
+    form_params = scrapy.Field()
+    listing_url = scrapy.Field()
