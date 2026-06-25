@@ -4,25 +4,61 @@
 
 Research papers accepted by {ICSE, FSE, ASE, ISSTA} since 2024.
 
-[中文说明](#中文说明) | [Environment Variables](#environment-variables)
+[中文说明](README_CN.md)
 
 ## Quick Start
 
 ```bash
 git clone https://github.com/iCSawyer/SEConfPaperList
 cd SEConfPaperList
-pip install scrapy orjson python-dotenv
+pip install requests lxml orjson python-dotenv
 cp .env.sample .env          # edit .env to add your API keys (optional)
-scrapy crawl paper_spider
+
+# Step 1: Scrape papers and enrich with abstracts
+python scrape_papers.py
+
+# Step 2: Translate titles and abstracts to Chinese (requires OPENAI_API_KEY)
+python translate_papers.py
+```
+
+Or run both steps together:
+
+```bash
+python run_pipeline.py
 ```
 
 ## How to Contribute
 
 1. Fork and clone: `git clone https://github.com/iCSawyer/SEConfPaperList`
-2. Install dependencies: `pip install scrapy orjson python-dotenv`
+2. Install dependencies: `pip install requests lxml orjson python-dotenv`
 3. Add new conference URLs in `paper_spiders/utils/paperlist.py`
-4. Run: `scrapy crawl paper_spider`
+4. Run: `python scrape_papers.py`
 5. Commit and push
+
+## Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `scrape_papers.py` | Scrape papers from conference listing pages, enrich with abstracts and arXiv links from researchr |
+| `translate_papers.py` | Translate titles and abstracts to Chinese via LLM API. Supports resume: re-run to continue from where it stopped. |
+| `jsonl_to_json.py` | Convert JSONL to structured JSON grouped by conference (for manual editing) |
+| `run_pipeline.py` | Run both scripts sequentially (convenience wrapper) |
+
+### Translate with resume
+
+```bash
+# Translate all untranslated papers
+python translate_papers.py
+
+# If interrupted, just re-run — it skips already-translated papers
+python translate_papers.py
+
+# Show how many papers need translation
+python translate_papers.py --dry-run
+
+# Force re-translate all papers
+python translate_papers.py --force
+```
 
 ## Environment Variables
 
@@ -30,13 +66,9 @@ Copy `.env.sample` to `.env` and fill in the keys you need:
 
 | Variable | Required | Description |
 |----------|:---:|------|
-| `ENRICH_SOURCE` | No | Enrichment method: `researchr` (default, native scraping) or `external` (DBLP/arXiv/S2) |
-| `SEMANTIC_SCHOLAR_API_KEY` | No | Only for `ENRICH_SOURCE=external`. [Apply here](https://api.semanticscholar.org/) |
-| `OPENAI_API_KEY` | No | Required for Chinese translation |
+| `OPENAI_API_KEY` | For translation | API key for LLM translation |
 | `OPENAI_BASE_URL` | No | API endpoint for translation (default: `https://api.openai.com/v1`) |
 | `TRANSLATE_MODEL` | No | Model for translation (default: `gpt-4o-mini`) |
-| `ENRICH` | No | Enable data enrichment (default: 1 = on) |
-| `ENRICH_TRANSLATE` | No | Enable Chinese translation (default: 0 = off) |
 
 ## Output Fields
 
@@ -49,139 +81,45 @@ Copy `.env.sample` to `.env` and fill in the keys you need:
 | `full_version_url` | researchr detail page | conf.researchr.org detail page URL |
 | `arxiv_url` | researchr detail page | arXiv abstract page (if pre-print available) |
 | `arxiv_pdf_url` | researchr detail page | arXiv PDF (if pre-print available) |
-| `keywords` | arXiv API | Categories (only with `ENRICH_SOURCE=external`) |
-| `title_cn` | LLM | Chinese translation |
-| `abstract_cn` | LLM | Chinese translation |
-| `arxiv_id` | – | arXiv paper ID (only with `ENRICH_SOURCE=external`) |
-| `doi` | DBLP | Published paper DOI (only with `ENRICH_SOURCE=external`) |
-| `dblp_url` | DBLP | DBLP page URL (only with `ENRICH_SOURCE=external`) |
-
-## Enrichment Methods
-
-### `researchr` (default, recommended)
-
-Native scraping of conf.researchr.org. No API keys needed, 100% abstract coverage.
-
-```
-For each paper:
-  POST modal AJAX endpoint → get detail page URL
-  GET detail page → extract abstract + pre-print links
-```
-
-### `external`
-
-Uses DBLP + arXiv + Semantic Scholar APIs. Provides DOI, keywords, and DBLP URL.
-
-```
-For each paper:
-  DBLP API → DOI + arXiv ID
-  arXiv API → abstract + keywords + PDF (if arXiv preprint)
-  Semantic Scholar API → abstract (fallback, if no arXiv)
-```
+| `keywords` | – | Reserved for future use |
+| `title_cn` | LLM | Chinese translation of title |
+| `abstract_cn` | LLM | Chinese translation of abstract |
+| `arxiv_id` | – | Reserved for future use |
+| `doi` | – | Reserved for future use |
+| `dblp_url` | – | Reserved for future use |
 
 ## Architecture
 
 ```
-paperlist.py          → 10 conference URLs
-paper_spider.py       → scrapes conf / title / author / uuid
-pipelines.py          → dedup + sort, then (depending on ENRICH_SOURCE):
-                          researchr: modal AJAX → detail page → abstract + pre-print
-                          external:   DBLP → arXiv → Semantic Scholar → abstract + DOI
-                          LLM API → Chinese translation (optional)
-papers.jsonl / .md    → output
+paperlist.py          → conference URLs
+scrape_papers.py      → fetch listing pages, parse titles/authors, enrich via researchr
+translate_papers.py   → translate titles/abstracts via LLM API (with resume support)
+papers.jsonl          → machine-generated data (source of truth)
+papers.json           → structured JSON grouped by conference (for manual editing)
 ```
 
-## Known Limitations
+## Manual Editing
 
-1. **researchr mode** — ~1.5s per paper (2 HTTP requests). 1918 papers take ~48 minutes.
-2. **external mode** — DBLP rate limit (3s/req). Semantic Scholar rate limit (3s/req without key).
-3. **arXiv coverage** — `arxiv_url`, `arxiv_pdf_url` only available for papers with pre-prints.
-4. **FSE 2024 / ISSTA 2024** — use separate domains. Spider handles this correctly.
+`paper_spiders/papers.json` is a structured JSON file grouped by conference, designed for manual editing:
 
----
-
-## 中文说明
-
-从 `conf.researchr.org` 抓取 SE 顶会论文列表，原生爬取详情页获取摘要，可选启用外部 API（DBLP、arXiv、Semantic Scholar）或 LLM 翻译。
-
-### 快速开始
-
-```bash
-git clone https://github.com/iCSawyer/SEConfPaperList
-cd SEConfPaperList
-pip install scrapy orjson python-dotenv
-cp .env.sample .env          # 编辑 .env，无需 API key 即可使用
-scrapy crawl paper_spider
+```json
+{
+  "ICSE 2026": [
+    {
+      "title": "A Paper Title",
+      "authors": "Author One, Author Two",
+      "abstract": "The abstract text...",
+      "arxiv_url": "https://arxiv.org/abs/...",
+      "title_cn": "中文标题",
+      "abstract_cn": "中文摘要"
+    }
+  ]
+}
 ```
 
-### 运行模式
-
-| 命令 | 说明 |
-|------|------|
-| `scrapy crawl paper_spider` | 默认：researchr 原生爬取，100% 摘要覆盖，约 48 分钟 |
-| `ENRICH_SOURCE=external scrapy crawl paper_spider` | 外部 API 方案（DBLP/arXiv/S2） |
-| `ENRICH_TRANSLATE=1 scrapy crawl paper_spider` | 额外启用中文翻译 |
-
-### 环境变量
-
-| 变量 | 必填 | 说明 |
-|------|:---:|------|
-| `ENRICH_SOURCE` | 否 | 补充方案：`researchr`（默认，原生爬取）或 `external`（外部 API） |
-| `SEMANTIC_SCHOLAR_API_KEY` | 否 | 仅 external 方案需要，[免费申请](https://api.semanticscholar.org/) |
-| `OPENAI_API_KEY` | 否 | 中文翻译需要 |
-| `OPENAI_BASE_URL` | 否 | 翻译 API 地址（默认 `https://api.openai.com/v1`） |
-| `TRANSLATE_MODEL` | 否 | 翻译模型（默认 `gpt-4o-mini`） |
-| `ENRICH` | 否 | 启用数据补充（默认 1 = 启用） |
-| `ENRICH_TRANSLATE` | 否 | 启用中文翻译（默认 0 = 不启用） |
-
-### 补充方案对比
-
-| | researchr（默认） | external |
-|------|:---:|:---:|
-| 原理 | 原生爬取 researchr 详情页 | DBLP + arXiv + Semantic Scholar |
-| 摘要覆盖率 | 100% | ~100% |
-| 需要 API key | 否 | 建议有 |
-| 速度 | 1.5 秒/篇 | 3-6 秒/篇 |
-| 关键词 | 无 | 有（arXiv 论文） |
-| DOI | 无 | 有 |
-| arXiv 链接 | 有（详情页提取） | 有 |
-
-### 数据流
-
-```
-paperlist.py          → 10 个会议 URL
-paper_spider.py       → 抓取 conf / title / author / uuid
-pipelines.py          → 去重排序，根据 ENRICH_SOURCE：
-                          researchr: modal AJAX → 详情页 → 摘要 + pre-print 链接
-                          external:   DBLP → arXiv → Semantic Scholar → 摘要 + DOI
-                          LLM API → 中文翻译（可选）
-papers.jsonl / .md    → 输出
-```
-
-### 输出字段
-
-| 字段 | 来源 | 说明 |
-|------|------|------|
-| `conf` | 配置 | 会议名称 |
-| `title` | 页面 | 论文标题 |
-| `author` | 页面 | 作者列表 |
-| `abstract` | researchr 详情页 | 摘要 |
-| `full_version_url` | researchr 详情页 | researchr 详情页 URL |
-| `arxiv_url` | researchr 详情页 | arXiv 摘要页（有预印本时） |
-| `arxiv_pdf_url` | researchr 详情页 | arXiv PDF（有预印本时） |
-| `keywords` | arXiv API | 分类标签（仅 external 方案） |
-| `title_cn` | LLM 翻译 | 中文标题 |
-| `abstract_cn` | LLM 翻译 | 中文摘要 |
-| `arxiv_id` | DBLP | arXiv 论文 ID（仅 external 方案） |
-| `doi` | DBLP | 正式出版 DOI（仅 external 方案） |
-| `dblp_url` | DBLP | DBLP 页面（仅 external 方案） |
-
-### 已知限制
-
-1. **researchr 方案** — 每篇论文 2 个 HTTP 请求，1918 篇约 48 分钟。
-2. **external 方案** — DBLP 限速 3 秒/次，Semantic Scholar 限速 3 秒/次（无 key）。
-3. **arXiv 链接** — 仅论文有预印本时才有。
-4. **FSE 2024 / ISSTA 2024** — 使用独立域名，爬虫已适配。
+- **Add** a paper: append an object to its conference array
+- **Remove** a paper: delete the object from the array
+- **Regenerate** from scraped data: `python jsonl_to_json.py`
 
 ### Papers
 | Conference | Title | Authors |
