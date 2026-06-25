@@ -26,7 +26,7 @@ from paper_spiders.utils.researchr import extract_form_params, fetch_detail_url,
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "paper_spiders", "papers.jsonl")
+OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "data", "papers.jsonl")
 BATCH_SAVE_INTERVAL = 5  # save every N papers
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
@@ -162,6 +162,34 @@ def deduplicate_and_sort(items):
     return unique
 
 
+def load_existing(path):
+    """Load existing papers from JSONL, keyed by (conf, title) for dedup."""
+    existing = {}
+    if os.path.exists(path):
+        with open(path, "rb") as f:
+            for line in f:
+                if line.strip():
+                    item = orjson.loads(line)
+                    key = (item.get("conf", ""), item.get("title", ""))
+                    existing[key] = item
+    return existing
+
+
+def merge_items(existing, new_items):
+    """Merge new items into existing, replacing duplicates by (conf, title)."""
+    merged = dict(existing)
+    for item in new_items:
+        key = (item["conf"], item["title"])
+        if key in merged:
+            # Keep existing translations if present
+            old = merged[key]
+            for field in ("title_cn", "abstract_cn"):
+                if old.get(field) and not item.get(field):
+                    item[field] = old[field]
+        merged[key] = item
+    return list(merged.values())
+
+
 def save_jsonl(items, path):
     """Save items to JSONL file atomically."""
     tmp = path + ".tmp"
@@ -187,7 +215,8 @@ def main():
 
     targets = paper_list
     if args.conf:
-        targets = [p for p in paper_list if p["conf"] == args.conf]
+        q = args.conf.lower().replace(" ", "")
+        targets = [p for p in paper_list if q in p["conf"].lower().replace(" ", "")]
         if not targets:
             logger.error(f"Conference '{args.conf}' not found in paper_list")
             sys.exit(1)
@@ -207,9 +236,15 @@ def main():
     abstract_ok = sum(1 for i in all_items if i.get("abstract"))
     arxiv_ok = sum(1 for i in all_items if i.get("arxiv_url"))
     logger.info(f"abstract={abstract_ok}, arxiv={arxiv_ok}")
-
     all_items = deduplicate_and_sort(all_items)
     logger.info(f"After dedup/sort: {len(all_items)} papers")
+
+    if args.conf:
+        # Merge with existing: single-conf scrape should not overwrite other conferences
+        existing = load_existing(OUTPUT_PATH)
+        all_items = merge_items(existing, all_items)
+        all_items = deduplicate_and_sort(all_items)
+        logger.info(f"After merge with existing: {len(all_items)} papers")
 
     save_jsonl(all_items, OUTPUT_PATH)
 

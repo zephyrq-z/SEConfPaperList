@@ -22,12 +22,16 @@ import orjson
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from dotenv import load_dotenv
+_ENV_PATH = os.path.join(os.path.dirname(__file__), ".env")
+load_dotenv(_ENV_PATH)
+
 from paper_spiders.utils.translate import translate_batch
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-INPUT_PATH = os.path.join(os.path.dirname(__file__), "paper_spiders", "papers.jsonl")
+INPUT_PATH = os.path.join(os.path.dirname(__file__), "data", "papers.jsonl")
 BATCH_SIZE = 10
 
 

@@ -14,8 +14,7 @@ import time
 import logging
 from urllib import parse as urlparse
 from urllib import request as urlrequest
-from typing import Optional, Dict, List, Tuple
-from scrapy.http import Response
+from typing import Optional, Dict, List
 
 logger = logging.getLogger(__name__)
 

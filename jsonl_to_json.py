@@ -31,8 +31,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from paper_spiders.utils.paperlist import paper_list
 
-JSONL_PATH = os.path.join(os.path.dirname(__file__), "paper_spiders", "papers.jsonl")
-JSON_PATH = os.path.join(os.path.dirname(__file__), "paper_spiders", "papers.json")
+JSONL_PATH = os.path.join(os.path.dirname(__file__), "data", "papers.jsonl")
+JSON_PATH = os.path.join(os.path.dirname(__file__), "data", "papers.json")
 
 FIELDS = [
     "title", "authors", "abstract", "full_version_url",
