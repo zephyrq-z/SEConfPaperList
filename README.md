@@ -4,7 +4,7 @@
 
 Research papers from {ICSE, FSE, ASE, ISSTA} since 2024.
 
-🌐 **Online**: [icsawyer.github.io/SEConfPaperList](https://icsawyer.github.io/SEConfPaperList/)
+🌐 **Online**: [zephyrq-z.github.io/SEConfPaperList](https://zephyrq-z.github.io/SEConfPaperList/)
 
 
 [中文](README_CN.md)

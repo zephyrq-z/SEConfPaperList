@@ -4,7 +4,7 @@
 
 {ICSE, FSE, ASE, ISSTA} 自 2024 年以来的研究论文。
 
-🌐 **在线浏览**: [icsawyer.github.io/SEConfPaperList](https://icsawyer.github.io/SEConfPaperList/)
+🌐 **在线浏览**: [zephyrq-z.github.io/SEConfPaperList](https://zephyrq-z.github.io/SEConfPaperList/)
 
 
 [English](README.md)
