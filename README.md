@@ -4,6 +4,9 @@
 
 Research papers from {ICSE, FSE, ASE, ISSTA} since 2024.
 
+🌐 **Online**: [icsawyer.github.io/SEConfPaperList](https://icsawyer.github.io/SEConfPaperList/)
+
+
 [中文](README_CN.md)
 
 ## Project Structure
@@ -110,6 +113,7 @@ All fields stored in `data/papers.jsonl` (one JSON object per line):
 | `full_version_url` | researchr detail page | Detail page URL |
 | `arxiv_url` | researchr detail page | arXiv abstract page |
 | `arxiv_pdf_url` | researchr detail page | arXiv PDF |
+| `doi` | researchr detail page | Publisher DOI (e.g. https://doi.org/10.1145/...) |
 | `title_cn` | LLM translation | Chinese title |
 | `abstract_cn` | LLM translation | Chinese abstract |
 

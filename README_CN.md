@@ -4,6 +4,9 @@
 
 {ICSE, FSE, ASE, ISSTA} 自 2024 年以来的研究论文。
 
+🌐 **在线浏览**: [icsawyer.github.io/SEConfPaperList](https://icsawyer.github.io/SEConfPaperList/)
+
+
 [English](README.md)
 
 ## 项目结构
@@ -110,6 +113,7 @@ python build_site.py
 | `full_version_url` | researchr 详情页 | 详情页 URL |
 | `arxiv_url` | researchr 详情页 | arXiv 摘要页 |
 | `arxiv_pdf_url` | researchr 详情页 | arXiv PDF |
+| `doi` | researchr 详情页 | 出版社 DOI（如 https://doi.org/10.1145/...） |
 | `title_cn` | LLM 翻译 | 中文标题 |
 | `abstract_cn` | LLM 翻译 | 中文摘要 |
 
