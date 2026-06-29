@@ -75,12 +75,19 @@ python translate_papers.py
 python scrape_papers.py --limit 10 --conf "ICSE 2026"
 ```
 
-### Resumable Translation
+### Translation (Chinese)
+
+Requires an OpenAI-compatible API key. Set it in `.env`:
 
 ```bash
-python translate_papers.py              # Translate untranslated papers
-python translate_papers.py --dry-run    # Preview how many need translation
-python translate_papers.py --force      # Re-translate everything
+cp .env.sample .env
+# edit .env: fill in OPENAI_API_KEY (and optionally OPENAI_BASE_URL, TRANSLATE_MODEL)
+```
+
+```bash
+python translate_papers.py              # translate untranslated papers (resumable)
+python translate_papers.py --dry-run    # preview how many need translation
+python translate_papers.py --force      # clear all + re-translate everything
 ```
 
 ### Static Paper Browser

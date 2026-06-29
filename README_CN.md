@@ -75,12 +75,19 @@ python translate_papers.py
 python scrape_papers.py --limit 10 --conf "ICSE 2026"
 ```
 
-### 断点续翻
+### 中文翻译
+
+需要 OpenAI 兼容的 API key。在 `.env` 中配置：
 
 ```bash
-python translate_papers.py              # 翻译未翻译的论文
-python translate_papers.py --dry-run    # 查看还需翻译多少
-python translate_papers.py --force      # 强制重新翻译所有
+cp .env.sample .env
+# 编辑 .env：填入 OPENAI_API_KEY（可选 OPENAI_BASE_URL、TRANSLATE_MODEL）
+```
+
+```bash
+python translate_papers.py              # 翻译未翻译的论文（断点续翻）
+python translate_papers.py --dry-run    # 预览还需翻译多少
+python translate_papers.py --force      # 清空旧翻译，全部重新翻译
 ```
 
 ### 静态论文浏览网站
