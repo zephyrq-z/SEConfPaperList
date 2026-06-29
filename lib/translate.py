@@ -12,7 +12,7 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = "gpt-4o-mini"
-MAX_RETRIES = 3
+MAX_RETRIES = 5
 BATCH_SIZE = 10
 
 
@@ -41,7 +41,9 @@ def _call_llm(messages: list[dict], api_key: str, base_url: str, model: str) -> 
             body = e.read().decode("utf-8") if e.fp else ""
             logger.error(f"LLM HTTP {e.code}: {body[:200]}")
             if e.code == 429:
-                time.sleep(2 ** attempt)
+                delay = 10 * (2 ** attempt)
+                logger.warning(f"Rate limited, retrying in {delay}s (attempt {attempt+1}/{MAX_RETRIES})...")
+                time.sleep(delay)
                 continue
             return None
         except Exception as e:

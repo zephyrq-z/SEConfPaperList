@@ -87,22 +87,30 @@ def main() -> None:
 
     start = time.time()
     translated = 0
+    total = len(to_translate)
+    total_batches = (total + BATCH_SIZE - 1) // BATCH_SIZE
+    print(f"Translating {total} papers in {total_batches} batches...")
 
-    for i in range(0, len(to_translate), BATCH_SIZE):
+    for i in range(0, total, BATCH_SIZE):
         batch = to_translate[i:i + BATCH_SIZE]
         batch_num = i // BATCH_SIZE + 1
-        total_batches = (len(to_translate) + BATCH_SIZE - 1) // BATCH_SIZE
 
-        logger.info("Batch %d/%d (%d papers)...", batch_num, total_batches, len(batch))
         translate_batch(batch, api_key, base_url, model)
 
         ok = sum(1 for p in batch if is_translated(p))
         translated += ok
+        pct = translated * 100 // total
+        bar_width = 30
+        filled = pct * bar_width // 100
+        bar = "\u2588" * filled + "\u2591" * (bar_width - filled)
+        elapsed = time.time() - start
+        rate = translated / elapsed if elapsed > 0 else 0
+        eta = (total - translated) / rate if rate > 0 else 0
+        print(f"\r  [{bar}] {pct:3d}%  {translated}/{total}  {rate:.1f}p/s  ETA {eta/60:.0f}m  ", end="", flush=True)
 
         save_jsonl(all_papers, input_path)
-        logger.info("  %d/%d translated, saved (progress: %d/%d)",
-                    ok, len(batch), done_count + translated, len(all_papers))
 
+    print()
     elapsed = time.time() - start
     logger.info("Done: %d papers translated in %.1f minutes", translated, elapsed / 60)
 
