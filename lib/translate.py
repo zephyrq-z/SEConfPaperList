@@ -114,28 +114,30 @@ Rules:
         {"role": "user", "content": json.dumps(input_items, ensure_ascii=False, indent=2)},
     ]
 
-    result = _call_llm(messages, api_key, base_url, model)
-    if not result:
-        for item in batch:
-            item["title_cn"] = ""
-            item["abstract_cn"] = ""
-        return
-
-    try:
-        cleaned = _extract_json_array(result)
-        if not cleaned:
-            raise ValueError("No JSON array in response")
-        translations = json.loads(cleaned)
-        tmap = {t["id"]: t for t in translations}
-        for idx, item in enumerate(batch):
-            if idx in tmap:
-                item["title_cn"] = tmap[idx].get("title_cn", "")
-                item["abstract_cn"] = tmap[idx].get("abstract_cn", "")
-            else:
-                item["title_cn"] = ""
-                item["abstract_cn"] = ""
-    except (json.JSONDecodeError, KeyError, TypeError, ValueError) as e:
-        logger.error(f"Failed to parse translation: {e}")
-        for item in batch:
-            item["title_cn"] = ""
-            item["abstract_cn"] = ""
+    for attempt in range(3):
+        result = _call_llm(messages, api_key, base_url, model)
+        if not result:
+            continue
+        try:
+            cleaned = _extract_json_array(result)
+            if not cleaned:
+                raise ValueError("No JSON array in response")
+            translations = json.loads(cleaned)
+            tmap = {t["id"]: t for t in translations}
+            for idx, item in enumerate(batch):
+                if idx in tmap:
+                    item["title_cn"] = tmap[idx].get("title_cn", "")
+                    item["abstract_cn"] = tmap[idx].get("abstract_cn", "")
+                else:
+                    item["title_cn"] = ""
+                    item["abstract_cn"] = ""
+            return
+        except (json.JSONDecodeError, KeyError, TypeError, ValueError) as e:
+            logger.warning(f"Parse failed (attempt {attempt+1}/3): {e}")
+            if attempt < 2:
+                time.sleep(3)
+    # All retries exhausted
+    logger.error("Translation failed after 3 parse attempts")
+    for item in batch:
+        item["title_cn"] = ""
+        item["abstract_cn"] = ""
