@@ -35,7 +35,7 @@ def _call_llm(messages: list[dict], api_key: str, base_url: str, model: str) -> 
             req = urllib.request.Request(url, data=payload)
             req.add_header("Content-Type", "application/json")
             req.add_header("Authorization", f"Bearer {api_key}")
-            resp = urllib.request.urlopen(req, timeout=60)
+            resp = urllib.request.urlopen(req, timeout=120)
             return json.loads(resp.read().decode("utf-8"))["choices"][0]["message"]["content"].strip()
         except urllib.error.HTTPError as e:
             body = e.read().decode("utf-8") if e.fp else ""
@@ -47,9 +47,10 @@ def _call_llm(messages: list[dict], api_key: str, base_url: str, model: str) -> 
                 continue
             return None
         except Exception as e:
-            logger.error(f"LLM error (attempt {attempt+1}): {e}")
+            delay = 5 * (2 ** attempt)
+            logger.warning(f"LLM error, retrying in {delay}s (attempt {attempt+1}/{MAX_RETRIES}): {e}")
             if attempt < MAX_RETRIES - 1:
-                time.sleep(1)
+                time.sleep(delay)
             else:
                 return None
     return None

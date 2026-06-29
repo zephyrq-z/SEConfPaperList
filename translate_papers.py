@@ -19,7 +19,7 @@ import time
 from dotenv import load_dotenv
 
 _ENV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
-load_dotenv(_ENV_PATH)
+load_dotenv(_ENV_PATH, override=True)
 
 from lib.io import load_jsonl, save_jsonl
 from lib.translate import translate_batch
@@ -86,6 +86,7 @@ def main() -> None:
     model = os.environ.get("TRANSLATE_MODEL", "gpt-4o-mini")
 
     start = time.time()
+    logger.info("API: %s (model: %s)", base_url[:60], model)
     translated = 0
     total = len(to_translate)
     total_batches = (total + BATCH_SIZE - 1) // BATCH_SIZE
