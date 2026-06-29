@@ -2,75 +2,55 @@
 """Translate paper titles and abstracts to Chinese with resume support.
 
 Usage:
-    python translate_papers.py              # translate all untranslated papers
-    python translate_papers.py --force      # re-translate all papers (ignore existing)
-    python translate_papers.py --dry-run    # show how many papers need translation
+    python translate_papers.py                           # translate all untranslated papers
+    python translate_papers.py --force                   # re-translate all papers
+    python translate_papers.py --dry-run                 # show how many papers need translation
+    python translate_papers.py --input data/run2.jsonl   # translate custom input file
 
-The script saves progress after each batch. If interrupted, simply re-run it
-to resume from where it left off.
-
-Requires: OPENAI_API_KEY (and optionally OPENAI_BASE_URL, TRANSLATE_MODEL)
+Saves progress after each batch. If interrupted, simply re-run to resume.
 """
 
-import sys
-import os
-import time
-import logging
 import argparse
-
-import orjson
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import logging
+import os
+import sys
+import time
 
 from dotenv import load_dotenv
-_ENV_PATH = os.path.join(os.path.dirname(__file__), ".env")
+
+_ENV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
 load_dotenv(_ENV_PATH)
 
-from paper_spiders.utils.translate import translate_batch
+from lib.io import load_jsonl, save_jsonl
+from lib.translate import translate_batch
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-INPUT_PATH = os.path.join(os.path.dirname(__file__), "data", "papers.jsonl")
+DEFAULT_INPUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "papers.jsonl")
 BATCH_SIZE = 10
 
 
-def load_papers(path):
-    """Load papers from JSONL file."""
-    if not os.path.exists(path):
-        logger.error(f"File not found: {path}")
-        logger.error("Run 'python scrape_papers.py' first.")
-        sys.exit(1)
-
-    with open(path, "rb") as f:
-        return [orjson.loads(line) for line in f if line.strip()]
+def is_translated(item: dict) -> bool:
+    tc = item.get("title_cn", "")
+    ac = item.get("abstract_cn", "")
+    return bool(tc) and bool(ac)
 
 
-def save_papers(papers, path):
-    """Save papers to JSONL file atomically."""
-    tmp = path + ".tmp"
-    with open(tmp, "wb") as f:
-        for item in papers:
-            f.write(orjson.dumps(item) + b"\n")
-    os.replace(tmp, path)
-
-
-def is_translated(item):
-    """Check if a paper has both title and abstract translated."""
-    return bool(item.get("title_cn", "").strip()) and bool(item.get("abstract_cn", "").strip())
-
-
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Translate paper titles and abstracts to Chinese")
+    parser.add_argument("--input", default=DEFAULT_INPUT,
+                        help=f"Input JSONL file (default: {DEFAULT_INPUT})")
     parser.add_argument("--force", action="store_true",
                         help="Re-translate all papers, ignoring existing translations")
     parser.add_argument("--dry-run", action="store_true",
-                        help="Only show how many papers need translation, don't translate")
+                        help="Only show how many papers need translation")
     args = parser.parse_args()
 
-    logger.info(f"Loading papers from {INPUT_PATH}")
-    all_papers = load_papers(INPUT_PATH)
-    logger.info(f"Loaded {len(all_papers)} papers")
+    input_path = args.input
+    logger.info("Loading papers from %s", input_path)
+    all_papers = load_jsonl(input_path)
+    logger.info("Loaded %d papers", len(all_papers))
 
     if args.force:
         to_translate = all_papers
@@ -81,16 +61,16 @@ def main():
         to_translate = [p for p in all_papers if not is_translated(p)]
 
     done_count = len(all_papers) - len(to_translate)
-    logger.info(f"Already translated: {done_count}")
-    logger.info(f"Need translation: {len(to_translate)}")
+    logger.info("Already translated: %d", done_count)
+    logger.info("Need translation: %d", len(to_translate))
 
     if args.dry_run:
         if to_translate:
             logger.info("Papers to translate:")
             for p in to_translate[:10]:
-                logger.info(f"  [{p['conf']}] {p['title'][:80]}")
+                logger.info("  [%s] %s", p["conf"], p["title"][:80])
             if len(to_translate) > 10:
-                logger.info(f"  ... and {len(to_translate) - 10} more")
+                logger.info("  ... and %d more", len(to_translate) - 10)
         return
 
     if not to_translate:
@@ -113,20 +93,18 @@ def main():
         batch_num = i // BATCH_SIZE + 1
         total_batches = (len(to_translate) + BATCH_SIZE - 1) // BATCH_SIZE
 
-        logger.info(f"Batch {batch_num}/{total_batches} ({len(batch)} papers)...")
-
+        logger.info("Batch %d/%d (%d papers)...", batch_num, total_batches, len(batch))
         translate_batch(batch, api_key, base_url, model)
 
-        # Count successful translations in this batch
         ok = sum(1 for p in batch if is_translated(p))
         translated += ok
 
-        # Save progress after each batch
-        save_papers(all_papers, INPUT_PATH)
-        logger.info(f"  {ok}/{len(batch)} translated, saved (total progress: {done_count + translated}/{len(all_papers)})")
+        save_jsonl(all_papers, input_path)
+        logger.info("  %d/%d translated, saved (progress: %d/%d)",
+                    ok, len(batch), done_count + translated, len(all_papers))
 
     elapsed = time.time() - start
-    logger.info(f"Done: {translated} papers translated in {elapsed/60:.1f} minutes")
+    logger.info("Done: %d papers translated in %.1f minutes", translated, elapsed / 60)
 
 
 if __name__ == "__main__":

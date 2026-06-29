@@ -19,7 +19,7 @@ from lxml import html as lxml_html
 
 from lib.config import CONFERENCES
 from lib.io import save_jsonl, load_existing, merge_items
-from lib.researchr import extract_form_params, fetch_detail_url, fetch_abstract, fetch_preprint_links, fetch_doi
+from lib.researchr import extract_form_params, fetch_detail_url, fetch_abstract, fetch_preprint_links
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -71,7 +71,6 @@ def scrape_listing(conf_info: dict, limit: int = 0) -> list[dict]:
             "full_version_url": "",
             "arxiv_url": "",
             "arxiv_pdf_url": "",
-            "doi": "",
             "title_cn": "",
             "abstract_cn": "",
         })
@@ -94,11 +93,11 @@ def enrich_papers(items: list[dict]) -> None:
         return form_params_cache[conf_url]
 
     total = len(items)
-    detail_count = abstract_count = preprint_count = doi_count = 0
+    detail_count = abstract_count = preprint_count = 0
     for i, item in enumerate(items):
         if i % 50 == 0 and i > 0:
-            logger.info("Enrich: %d/%d (detail=%d, abstract=%d, preprint=%d, doi=%d)",
-                        i, total, detail_count, abstract_count, preprint_count, doi_count)
+            logger.info("Enrich: %d/%d (detail=%d, abstract=%d, preprint=%d)",
+                        i, total, detail_count, abstract_count, preprint_count)
         uuid = item.get("uuid", "")
         if not uuid:
             continue
@@ -127,14 +126,11 @@ def enrich_papers(items: list[dict]) -> None:
                     item["arxiv_pdf_url"] = link.replace("/abs/", "/pdf/") + ".pdf"
                     preprint_count += 1
                     break
-
-            doi = fetch_doi(detail_url, session)
-            if doi:
-                doi_count += 1
-                item["doi"] = doi
         time.sleep(0.1)
-    logger.info("Enrich done: %d/%d (detail=%d, abstract=%d, preprint=%d, doi=%d)",
-                total, total, detail_count, abstract_count, preprint_count, doi_count)
+
+    logger.info("Enrich done: %d/%d (detail=%d, abstract=%d, preprint=%d)",
+                total, total, detail_count, abstract_count, preprint_count)
+
 
 def _extract_year(item: dict) -> int:
     for token in reversed(item["conf"].split()):
@@ -199,8 +195,7 @@ def main() -> None:
         enrich_papers(items)
         abstract_ok = sum(1 for i in items if i.get("abstract"))
         arxiv_ok = sum(1 for i in items if i.get("arxiv_url"))
-        doi_ok = sum(1 for i in items if i.get("doi"))
-        logger.info("  %s: abstract=%d, arxiv=%d, doi=%d", conf_info["conf"], abstract_ok, arxiv_ok, doi_ok)
+        logger.info("  %s: abstract=%d, arxiv=%d", conf_info["conf"], abstract_ok, arxiv_ok)
 
         # Merge into existing and save immediately
         all_items = merge_items(existing, items)
