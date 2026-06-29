@@ -39,6 +39,7 @@ def scrape_listing(conf_info: dict, limit: int = 0) -> list[dict]:
     tree = lxml_html.fromstring(resp.content)
 
     items = []
+    seen_uuids = set()
     rows = tree.cssselect("tr")
     for row in rows:
         # Find paper link: <a href="#" data-event-modal="UUID">TITLE</a>
@@ -53,6 +54,8 @@ def scrape_listing(conf_info: dict, limit: int = 0) -> list[dict]:
             break
         title = title_el[0].text_content().strip()
         uuid = title_el[0].get("data-event-modal", "")
+        if uuid in seen_uuids:
+            continue
 
         # Extract authors from performers div
         authors = ""
@@ -61,7 +64,6 @@ def scrape_listing(conf_info: dict, limit: int = 0) -> list[dict]:
             # Authors are in <a> tags inside performers div
             author_links = performers_el[0].cssselect("a")
             authors = ", ".join(a.text_content().strip() for a in author_links)
-
         items.append({
             "conf": conf_name,
             "title": title,
@@ -75,6 +77,7 @@ def scrape_listing(conf_info: dict, limit: int = 0) -> list[dict]:
             "title_cn": "",
             "abstract_cn": "",
         })
+        seen_uuids.add(uuid)
     return items
 
 

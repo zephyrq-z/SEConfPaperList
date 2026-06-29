@@ -106,11 +106,11 @@ body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica 
 .ci .cnt{{font-size:.7rem;background:rgba(205,214,244,.15);padding:2px 8px;border-radius:10px;color:#a6adc8}}
 .ci.act .cnt{{background:rgba(137,180,250,.2);color:var(--sb-ac)}}
 .sb-ft{{padding:12px 16px;border-top:1px solid rgba(205,214,244,.15);font-size:.7rem;color:#6c7086;display:flex;justify-content:space-between;align-items:center}}
-.main{{flex:1;display:flex;flex-direction:column;min-width:0}}
-.tb{{padding:12px 24px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;background:var(--card);position:sticky;top:0;z-index:10}}
+.main{{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh;overflow:hidden}}
+.tb{{padding:12px 24px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;background:var(--card);flex-shrink:0}}
 .tb .clb{{font-size:.85rem;color:var(--t2);font-weight:500}}
 .tb .plb{{font-size:.85rem;color:var(--t2)}}
-.ct{{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}}
+.ct{{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:24px;justify-content:flex-start}}
 .card{{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--br);padding:32px;max-width:1100px;width:100%}}
 .card .pi{{font-size:.75rem;color:var(--t2);margin-bottom:8px}}
 .card .pt{{font-size:1.25rem;font-weight:700;line-height:1.45;margin-bottom:12px}}
@@ -122,7 +122,7 @@ body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica 
 .card .pl a{{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:500;text-decoration:none;transition:background .15s;background:var(--tag-bg);color:var(--tag-txt)}}
 .card .pl a:hover{{opacity:.8}}
 .card .pl a.ax{{background:#b31b1b1a;color:#b31b1b}}
-.nb{{display:flex;align-items:center;gap:16px;padding:16px 24px;border-top:1px solid var(--br);background:var(--card)}}
+.nb{{display:flex;align-items:center;gap:16px;padding:16px 24px;border-top:1px solid var(--br);background:var(--card);flex-shrink:0}}
 .nb button{{padding:8px 20px;border-radius:6px;border:1px solid var(--br);background:var(--card);color:var(--txt);font-size:.85rem;cursor:pointer;transition:all .15s;font-weight:500}}
 .nb button:hover:not(:disabled){{border-color:var(--ac);color:var(--ac)}}
 .nb button:disabled{{opacity:.35;cursor:default}}
@@ -131,7 +131,7 @@ body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica 
 .emp h2{{font-size:1.5rem;margin-bottom:8px}}
 .theme-btn{{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:4px;border:1px solid rgba(205,214,244,.2);background:rgba(205,214,244,.08);color:#a6adc8;font-size:.7rem;cursor:pointer;transition:all .15s}}
 .theme-btn:hover{{background:rgba(205,214,244,.15);color:#fff}}
-@media(max-width:700px){{body{{flex-direction:column}}.sb{{width:100%;min-width:0;height:auto;max-height:40vh;position:relative}}.card{{padding:20px}}.tb{{padding:10px 16px;flex-wrap:wrap;gap:4px}}.nb{{padding:10px 16px;gap:8px}}.nb button{{padding:8px 14px;font-size:.8rem}}}}
+@media(max-width:700px){{body{{flex-direction:column}}.sb{{width:100%;min-width:0;height:auto;max-height:40vh;position:relative}}.main{{height:auto}}.card{{padding:20px}}.tb{{padding:10px 16px;flex-wrap:wrap;gap:4px;flex-shrink:0}}.nb{{padding:10px 16px;gap:8px;flex-shrink:0}}.nb button{{padding:8px 14px;font-size:.8rem}}}}
 .rog-ambient,.rog-edge{{display:none}}
 </style>
 <style id="rog-css">
