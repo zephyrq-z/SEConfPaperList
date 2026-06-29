@@ -1,11 +1,9 @@
-name: Build and Deploy Paper Browser
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * 0'  # weekly on Sunday
 
 permissions:
   contents: read
@@ -17,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,10 +24,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install dependencies
-        run: pip install orjson requests lxml python-dotenv
-
-      - name: Build static site
+      - name: Build site
         run: python build_site.py
 
       - uses: actions/configure-pages@v4
