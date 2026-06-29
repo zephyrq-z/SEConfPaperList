@@ -105,7 +105,7 @@ body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica 
 .ci.act{{background:var(--sb-hv);border-left-color:var(--sb-ac);color:#fff}}
 .ci .cnt{{font-size:.7rem;background:rgba(205,214,244,.15);padding:2px 8px;border-radius:10px;color:#a6adc8}}
 .ci.act .cnt{{background:rgba(137,180,250,.2);color:var(--sb-ac)}}
-.sb-ft{{padding:12px 16px;border-top:1px solid rgba(205,214,244,.15);font-size:.7rem;color:#6c7086}}
+.sb-ft{{padding:12px 16px;border-top:1px solid rgba(205,214,244,.15);font-size:.7rem;color:#6c7086;display:flex;justify-content:space-between;align-items:center}}
 .main{{flex:1;display:flex;flex-direction:column;min-width:0}}
 .tb{{padding:12px 24px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;background:var(--card);position:sticky;top:0;z-index:10}}
 .tb .clb{{font-size:.85rem;color:var(--t2);font-weight:500}}
@@ -129,15 +129,73 @@ body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica 
 .nb .np{{font-size:.8rem;color:var(--t2);margin:0 auto}}
 .emp{{text-align:center;color:var(--t2)}}
 .emp h2{{font-size:1.5rem;margin-bottom:8px}}
+.theme-btn{{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:4px;border:1px solid rgba(205,214,244,.2);background:rgba(205,214,244,.08);color:#a6adc8;font-size:.7rem;cursor:pointer;transition:all .15s}}
+.theme-btn:hover{{background:rgba(205,214,244,.15);color:#fff}}
 @media(max-width:700px){{body{{flex-direction:column}}.sb{{width:100%;min-width:0;height:auto;max-height:40vh;position:relative}}.card{{padding:20px}}.tb{{padding:10px 16px;flex-wrap:wrap;gap:4px}}.nb{{padding:10px 16px;gap:8px}}.nb button{{padding:8px 14px;font-size:.8rem}}}}
+.rog-ambient,.rog-edge{{display:none}}
+</style>
+<style id="rog-css">
+html.rog{{--bg:#08080d;--sb-bg:#0d0d15;--sb-txt:#a09ab8;--sb-ac:#ff2d95;--sb-hv:#1a1a2a;--card:#13131e;--txt:#e8e6f0;--t2:#a09ab8;--ac:#ff2d95;--br:rgba(255,255,255,.07);--tag-bg:rgba(255,45,149,.1);--tag-txt:#ff2d95;--sh:0 0 20px rgba(255,45,149,.1);--r:8px;font-family:"SF Mono","Cascadia Code","JetBrains Mono",Menlo,Monaco,monospace}}
+html.rog body{{background:var(--bg);font-family:"SF Mono","Cascadia Code","JetBrains Mono",Menlo,Monaco,monospace}}
+html.rog .sb{{background:var(--sb-bg);border-right-color:rgba(255,255,255,.06)}}
+html.rog .sb-hd h1{{color:#ff2d95;text-shadow:0 0 12px rgba(255,45,149,.4);letter-spacing:1px;text-transform:uppercase}}
+html.rog .sb-hd .sub{{color:#6e6a82}}
+html.rog .srch input{{background:var(--sb-hv);border-color:rgba(255,255,255,.08);color:var(--txt);font-family:inherit}}
+html.rog .srch input:focus{{border-color:var(--ac);box-shadow:0 0 12px rgba(255,45,149,.2)}}
+html.rog .ci{{font-family:inherit;border-left-color:transparent}}
+html.rog .ci:hover{{background:var(--sb-hv)}}
+html.rog .ci.act{{background:var(--sb-hv);border-left-color:var(--ac);color:#fff;box-shadow:inset 0 0 12px rgba(255,45,149,.08)}}
+html.rog .ci .cnt{{background:rgba(255,45,149,.12);color:var(--sb-ac)}}
+html.rog .ci.act .cnt{{background:rgba(255,45,149,.2);color:#ff2d95}}
+html.rog .sb-ft{{border-top-color:rgba(255,255,255,.06);color:#6e6a82}}
+html.rog .tb{{border-bottom-color:rgba(255,255,255,.06);background:var(--card)}}
+html.rog .card{{background:var(--card);border:1px solid rgba(255,45,149,.15);box-shadow:0 0 20px rgba(255,45,149,.08),0 0 40px rgba(255,45,149,.03)}}
+html.rog .card .pt{{color:#fff;font-size:1.2rem;letter-spacing:.3px}}
+html.rog .card .ptc{{color:#a09ab8;font-size:1rem}}
+html.rog .card .pa{{color:var(--t2);border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:16px;margin-bottom:16px}}
+html.rog .card .pab{{color:#c8c4d8;line-height:1.7}}
+html.rog .card .pac{{color:#a09ab8;line-height:1.7}}
+html.rog .card .pl a{{background:rgba(255,45,149,.1);color:#ff2d95;border:1px solid rgba(255,45,149,.2);font-family:inherit}}
+html.rog .card .pl a:hover{{background:rgba(255,45,149,.2);box-shadow:0 0 10px rgba(255,45,149,.2);opacity:1}}
+html.rog .card .pl a.ax{{background:rgba(0,229,255,.08);color:#00e5ff;border-color:rgba(0,229,255,.2)}}
+html.rog .card .pl a.ax:hover{{box-shadow:0 0 10px rgba(0,229,255,.2)}}
+html.rog .nb{{border-top-color:rgba(255,255,255,.06);background:var(--card)}}
+html.rog .nb button{{background:var(--sb-hv);border-color:rgba(255,255,255,.08);color:var(--txt);font-family:inherit}}
+html.rog .nb button:hover:not(:disabled){{border-color:var(--ac);color:var(--ac);box-shadow:0 0 10px rgba(255,45,149,.15)}}
+html.rog .nb .np{{color:var(--t2)}}
+html.rog .nb .np input{{background:var(--sb-hv);border-color:rgba(255,255,255,.08);color:var(--txt);font-family:inherit}}
+html.rog .tb .clb{{color:var(--t2)}}
+html.rog .tb .plb{{color:var(--t2)}}
+html.rog .card .pi{{color:#6e6a82}}
+html.rog .emp{{color:var(--t2)}}
+html.rog .sb-ft a{{color:#ff2d95;text-decoration:none}}
+html.rog .sb-ft a:hover{{text-shadow:0 0 8px rgba(255,45,149,.5)}}
+html.rog .theme-btn{{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:4px;border:1px solid rgba(255,45,149,.2);background:rgba(255,45,149,.08);color:#ff2d95;font-size:.7rem;font-family:inherit;cursor:pointer;transition:all .15s}}
+html.rog .theme-btn:hover{{background:rgba(255,45,149,.15);box-shadow:0 0 10px rgba(255,45,149,.2)}}
+html.rog::after{{content:"";position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px)}}
+@keyframes rogGlow{{0%,100%{{border-color:rgba(255,45,149,.15);box-shadow:0 0 20px rgba(255,45,149,.08),0 0 40px rgba(255,45,149,.03)}}50%{{border-color:rgba(255,45,149,.25);box-shadow:0 0 25px rgba(255,45,149,.12),0 0 50px rgba(180,77,255,.05)}}}}
+html.rog .card{{animation:rogGlow 3s ease-in-out infinite}}
+@keyframes ambientBreathe{{0%,100%{{opacity:.7}}50%{{opacity:1}}}}
+@keyframes edgeBreathe{{0%,100%{{opacity:.5}}50%{{opacity:.85}}}}
+html.rog .rog-ambient{{display:block}}
+html.rog .rog-edge{{display:block}}
+@keyframes neonPulse{{0%,100%{{opacity:1}}50%{{opacity:.7}}}}
+html.rog .rog-ambient{{position:fixed;inset:0;pointer-events:none;z-index:9998;background:radial-gradient(ellipse 500px 350px at 0% 0%,rgba(255,45,149,.35) 0%,transparent 55%),radial-gradient(ellipse 500px 350px at 100% 0%,rgba(180,77,255,.3) 0%,transparent 55%),radial-gradient(ellipse 500px 350px at 100% 100%,rgba(0,229,255,.25) 0%,transparent 55%),radial-gradient(ellipse 500px 350px at 0% 100%,rgba(57,255,20,.22) 0%,transparent 55%),radial-gradient(ellipse 250px 500px at 50% 0%,rgba(255,45,149,.35) 0%,transparent 65%),radial-gradient(ellipse 250px 500px at 100% 50%,rgba(180,77,255,.3) 0%,transparent 65%),radial-gradient(ellipse 250px 500px at 50% 100%,rgba(0,229,255,.25) 0%,transparent 65%),radial-gradient(ellipse 250px 500px at 0% 50%,rgba(57,255,20,.22) 0%,transparent 65%);animation:ambientBreathe 3s ease-in-out infinite}}
+html.rog .rog-edge{{position:fixed;inset:0;pointer-events:none;z-index:9997;background:linear-gradient(to bottom,rgba(255,45,149,.22) 0%,transparent 150px),linear-gradient(to left,rgba(180,77,255,.2) 0%,transparent 150px),linear-gradient(to top,rgba(0,229,255,.17) 0%,transparent 150px),linear-gradient(to right,rgba(57,255,20,.14) 0%,transparent 150px);animation:edgeBreathe 4s ease-in-out infinite}}
+html.rog::-webkit-scrollbar{{width:6px;height:6px}}
+html.rog::-webkit-scrollbar-track{{background:transparent}}
+html.rog::-webkit-scrollbar-thumb{{background:rgba(255,45,149,.2);border-radius:3px}}
+html.rog::-webkit-scrollbar-thumb:hover{{background:rgba(255,45,149,.4)}}
+html.rog::selection{{background:rgba(255,45,149,.3);color:#fff}}
 </style>
 </head>
 <body>
+<div class="rog-ambient"></div><div class="rog-edge"></div>
 <aside class="sb">
   <div class="sb-hd"><h1>{t}</h1><div class="sub">{d}</div></div>
   <div class="srch"><input id="sch" placeholder="Search {total} papers\u2026" autocomplete="off"></div>
   <nav class="cl" id="cl"></nav>
-  <div class="sb-ft"><span id="ft">{total} papers</span> &middot; <a href="https://github.com/zephyrq-z/SEConfPaperList" style="color:inherit">GitHub</a></div>
+  <div class="sb-ft"><span><span id="ft">{total} papers</span> &middot; <a href="https://github.com/zephyrq-z/SEConfPaperList" style="color:inherit">GitHub</a></span><button class="theme-btn" id="rog-toggle" onclick="toggleROG()" title="Toggle theme">&#9788;</button></div>
 </aside>
 <main class="main">
   <div class="tb"><span class="clb" id="tbc"></span><span class="plb" id="tbp"></span></div>
@@ -198,10 +256,10 @@ function rd(){{
   if(p.abstract)h+='<div class="pab">'+esc(p.abstract)+'</div>';
   if(p.abstract_cn)h+='<div class="pac">'+esc(p.abstract_cn)+'</div>';
   var lks=[];
-  if(p.full_version_url)lks.push('<a href="'+esc(p.full_version_url)+'" target="_blank" rel="noopener">&#128279; Researchr</a>');
-  if(p.doi)lks.push('<a class="dx" href="'+esc(p.doi)+'" target="_blank" rel="noopener">DOI</a>');
-  if(p.arxiv_url)lks.push('<a class="ax" href="'+esc(p.arxiv_url)+'" target="_blank" rel="noopener">arXiv</a>');
-  if(p.arxiv_pdf_url)lks.push('<a class="ax" href="'+esc(p.arxiv_pdf_url)+'" target="_blank" rel="noopener">PDF</a>');
+  if(p.full_version_url)lks.push('<a href="'+esc(p.full_version_url)+'" target="_blank">&#128279; Researchr</a>');
+  if(p.doi)lks.push('<a class="dx" href="'+esc(p.doi)+'" target="_blank">DOI</a>');
+  if(p.arxiv_url)lks.push('<a class="ax" href="'+esc(p.arxiv_url)+'" target="_blank">arXiv</a>');
+  if(p.arxiv_pdf_url)lks.push('<a class="ax" href="'+esc(p.arxiv_pdf_url)+'" target="_blank">PDF</a>');
   if(lks.length)h+='<div class="pl">'+lks.join("")+'</div>';
   h+='</div>';
   document.getElementById("ct").innerHTML=h;
@@ -236,6 +294,8 @@ document.addEventListener("keydown",function(e){{
   if(ps.length>=2){{var n=parseInt(ps[1],10);if(!isNaN(n)&&n>=1)ci=n-1;}}
 }})();
 rd();
+function toggleROG(){{var h=document.documentElement;h.classList.toggle("rog");var b=document.getElementById("rog-toggle");b.innerHTML=h.classList.contains("rog")?"&#9789;":"&#9788;";localStorage.setItem("rog",""+(h.classList.contains("rog")?"1":"0"));}}
+(function(){{if(localStorage.getItem("rog")==="1"){{document.documentElement.classList.add("rog");document.getElementById("rog-toggle").innerHTML="&#9789;";}}}})();
 </script>
 </body>
 </html>"""
