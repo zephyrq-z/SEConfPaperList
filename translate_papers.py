@@ -28,7 +28,6 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 DEFAULT_INPUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "papers.jsonl")
-BATCH_SIZE = 10
 
 
 def is_translated(item: dict) -> bool:
@@ -89,28 +88,27 @@ def main() -> None:
     logger.info("API: %s (model: %s)", base_url[:60], model)
     translated = 0
     total = len(to_translate)
-    total_batches = (total + BATCH_SIZE - 1) // BATCH_SIZE
-    print(f"Translating {total} papers in {total_batches} batches...")
+    print(f"Translating {total} papers...")
 
-    for i in range(0, total, BATCH_SIZE):
-        batch = to_translate[i:i + BATCH_SIZE]
-        batch_num = i // BATCH_SIZE + 1
+    for i, item in enumerate(to_translate):
+        translate_batch([item], api_key, base_url, model)
 
-        translate_batch(batch, api_key, base_url, model)
+        if is_translated(item):
+            translated += 1
+        if (i + 1) % 10 == 0 or i == total - 1:
+            pct = translated * 100 // total
+            bar_width = 30
+            filled = pct * bar_width // 100
+            bar = "\u2588" * filled + "\u2591" * (bar_width - filled)
+            elapsed = time.time() - start
+            rate = (i + 1) / elapsed if elapsed > 0 else 0
+            eta = (total - i - 1) / rate if rate > 0 else 0
+            print(f"\r  [{bar}] {pct:3d}%  {translated}/{total}  {rate:.1f}p/s  ETA {eta/60:.0f}m  ", end="", flush=True)
 
-        ok = sum(1 for p in batch if is_translated(p))
-        translated += ok
-        pct = translated * 100 // total
-        bar_width = 30
-        filled = pct * bar_width // 100
-        bar = "\u2588" * filled + "\u2591" * (bar_width - filled)
-        elapsed = time.time() - start
-        rate = translated / elapsed if elapsed > 0 else 0
-        eta = (total - translated) / rate if rate > 0 else 0
-        print(f"\r  [{bar}] {pct:3d}%  {translated}/{total}  {rate:.1f}p/s  ETA {eta/60:.0f}m  ", end="", flush=True)
+        if (i + 1) % 50 == 0:
+            save_jsonl(all_papers, input_path)
 
-        save_jsonl(all_papers, input_path)
-
+    save_jsonl(all_papers, input_path)
     print()
     elapsed = time.time() - start
     logger.info("Done: %d papers translated in %.1f minutes", translated, elapsed / 60)
