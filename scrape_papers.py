@@ -66,6 +66,7 @@ def scrape_listing(conf_info: dict, limit: int = 0) -> list[dict]:
             authors = ", ".join(a.text_content().strip() for a in author_links)
         items.append({
             "conf": conf_name,
+            "tier": conf_info.get("tier", ""),
             "title": title,
             "author": authors,
             "uuid": uuid,
@@ -77,7 +78,6 @@ def scrape_listing(conf_info: dict, limit: int = 0) -> list[dict]:
             "title_cn": "",
             "abstract_cn": "",
         })
-        seen_uuids.add(uuid)
     return items
 
 

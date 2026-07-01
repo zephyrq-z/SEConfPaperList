@@ -45,7 +45,8 @@ def build(input_path: str, output_path: str) -> None:
     confs = []
     global_idx = 0
     for conf_name, items in by_conf.items():
-        confs.append({"name": conf_name, "count": len(items), "start_idx": global_idx})
+        tier = items[0].get("tier", "") if items else ""
+        confs.append({"name": conf_name, "count": len(items), "start_idx": global_idx, "tier": tier})
         global_idx += len(items)
 
     flat = []
@@ -54,6 +55,7 @@ def build(input_path: str, output_path: str) -> None:
         flat.append({
             "conf": conf_name,
             "idx": idx_in_conf,
+            "tier": p.get("tier", ""),
             "title": p.get("title", ""),
             "authors": p.get("author", ""),
             "abstract": p.get("abstract", ""),
@@ -104,6 +106,7 @@ body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica 
 .ci:hover{{background:var(--sb-hv)}}
 .ci.act{{background:var(--sb-hv);border-left-color:var(--sb-ac);color:#fff}}
 .ci .cnt{{font-size:.7rem;background:rgba(205,214,244,.15);padding:2px 8px;border-radius:10px;color:#a6adc8}}
+.st{{font-size:.7rem;color:#6c7086;padding:8px 16px 4px;cursor:default;font-weight:600}}
 .ci.act .cnt{{background:rgba(137,180,250,.2);color:var(--sb-ac)}}
 .sb-ft{{padding:12px 16px;border-top:1px solid rgba(205,214,244,.15);font-size:.7rem;color:#6c7086;display:flex;justify-content:space-between;align-items:center}}
 .main{{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh;overflow:hidden}}
@@ -111,6 +114,9 @@ body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica 
 .tb .clb{{font-size:.85rem;color:var(--t2);font-weight:500}}
 .tb .plb{{font-size:.85rem;color:var(--t2)}}
 .ct{{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:24px;justify-content:flex-start}}
+.tier-A{{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:3px;background:#dbeafe;color:#1e40af;margin-right:4px;vertical-align:middle}}
+.tier-B{{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:3px;background:#fef3c7;color:#92400e;margin-right:4px;vertical-align:middle}}
+@media(prefers-color-scheme:dark){{.tier-A{{background:#1e3a5f;color:#93c5fd}}.tier-B{{background:#3d2e0a;color:#fcd34d}}}}
 .card{{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--br);padding:32px;max-width:1100px;width:100%}}
 .card .pi{{font-size:.75rem;color:var(--t2);margin-bottom:8px}}
 .card .pt{{font-size:1.25rem;font-weight:700;line-height:1.45;margin-bottom:12px}}
@@ -216,16 +222,8 @@ ai.className="ci act";
 ai.innerHTML='<span>All Conferences</span><span class="cnt">{total}</span>';
 ai.addEventListener("click",function(){{sc(null);}});
 cl.appendChild(ai);
-CONFS.forEach(function(c){{
-  var e=document.createElement("div");
-  e.className="ci";
-  e.textContent=c.name;
-  var b=document.createElement("span");
-  b.className="cnt";b.textContent=c.count;
-  e.appendChild(b);
-  e.addEventListener("click",function(){{sc(c.name);}});
-  cl.appendChild(e);
-}});
+var tiers=[{{label:"CCF-A",key:"A"}},{{label:"CCF-B",key:"B"}}];
+tiers.forEach(function(t){{var a=CONFS.filter(function(c){{return c.tier===t.key;}});if(!a.length)return;var h=document.createElement("div");h.className="st";h.textContent=t.label;cl.appendChild(h);a.forEach(function(c){{var e=document.createElement("div");e.className="ci";e.textContent=c.name;var b=document.createElement("span");b.className="cnt";b.textContent=c.count;e.appendChild(b);e.addEventListener("click",function(){{sc(c.name);}});cl.appendChild(e);}});}});
 function fp(){{
   var l=PAPERS;
   if(cc)l=l.filter(function(p){{return p.conf===cc;}});
@@ -236,8 +234,8 @@ function esc(s){{return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/
 function rd(){{
   var f=fp();if(f.length===0){{ci=0;}}else{{if(ci>=f.length)ci=f.length-1;if(ci<0)ci=0;}}
   var is=document.querySelectorAll(".ci");for(var i=0;i<is.length;i++)is[i].classList.remove("act");
-  if(cc===null)cl.children[0].classList.add("act");
-  else{{for(var j=0;j<CONFS.length;j++)if(CONFS[j].name===cc){{cl.children[j+1].classList.add("act");break;}}}}
+  if(cc===null)cl.querySelector(".ci").classList.add("act");
+  else{{var items=cl.querySelectorAll(".ci");for(var j=0;j<items.length;j++)if(items[j].textContent.startsWith(cc)){{items[j].classList.add("act");break;}}}}
   document.getElementById("tbc").textContent=cc||"All Conferences";
   if(f.length===0){{
     document.getElementById("tbp").textContent="No papers found";
@@ -249,7 +247,7 @@ function rd(){{
   document.getElementById("tbp").textContent="#"+(ci+1)+" of "+f.length;
   var p=f[ci],ri=PAPERS.indexOf(p)+1;
   var h='<div class="card">';
-  h+='<div class="pi">#'+ri+' &middot; '+esc(p.conf)+'</div>';
+  h+='<div class="pi">#'+ri+' &middot; <span class="tier-'+esc(p.tier||'')+'">CCF-'+esc(p.tier||'')+'</span> '+esc(p.conf)+'</div>';
   h+='<div class="pt">'+esc(p.title)+'</div>';
   if(p.title_cn)h+='<div class="ptc">'+esc(p.title_cn)+'</div>';
   h+='<div class="pa">'+esc(p.authors)+'</div>';
